@@ -1,0 +1,19 @@
+{
+  "name": "gdrive-folder-dl",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/grallc/gdrive-folder-dl.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/grallc/gdrive-folder-dl/issues"
+  },
+  "homepage": "https://github.com/grallc/gdrive-folder-dl#readme"
+}
