@@ -12,3 +12,6 @@ package-lock.json
 # VSCode
 .vscode
 .vs/
+
+# Others
+credentials.json

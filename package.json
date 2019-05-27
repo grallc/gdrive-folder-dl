@@ -15,5 +15,10 @@
   "bugs": {
     "url": "https://github.com/grallc/gdrive-folder-dl/issues"
   },
-  "homepage": "https://github.com/grallc/gdrive-folder-dl#readme"
+  "homepage": "https://github.com/grallc/gdrive-folder-dl#readme",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "fs": "0.0.1-security",
+    "googleapis": "^39.2.0"
+  }
 }
