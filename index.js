@@ -1,9 +1,11 @@
 const fs = require('fs');
 const readline = require('readline');
-const {google} = require('googleapis');
+const {
+  google
+} = require('googleapis');
 
 // If modifying these scopes, delete token.json.
-const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
+const SCOPES = ['https://www.googleapis.com/auth/drive.readonly'];
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
@@ -12,6 +14,11 @@ const TOKEN_PATH = 'token.json';
 // Load client secrets from a local file.
 fs.readFile('credentials.json', (err, content) => {
   if (err) return console.log('Error loading client secret file:', err);
+  
+  const dir = `files`;
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+  }
   // Authorize a client with credentials, then call the Google Drive API.
   authorize(JSON.parse(content), listFiles);
 });
@@ -23,9 +30,13 @@ fs.readFile('credentials.json', (err, content) => {
  * @param {function} callback The callback to call with the authorized client.
  */
 function authorize(credentials, callback) {
-  const {client_secret, client_id, redirect_uris} = credentials.installed;
+  const {
+    client_secret,
+    client_id,
+    redirect_uris
+  } = credentials.installed;
   const oAuth2Client = new google.auth.OAuth2(
-      client_id, client_secret, redirect_uris[0]);
+    client_id, client_secret, redirect_uris[0]);
 
   // Check if we have previously stored a token.
   fs.readFile(TOKEN_PATH, (err, token) => {
@@ -71,20 +82,46 @@ function getAccessToken(oAuth2Client, callback) {
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 function listFiles(auth) {
-  const drive = google.drive({version: 'v3', auth});
+  const drive = google.drive({
+    version: 'v3',
+    auth
+  });
+
+  console.log('Starting listing files...')
+
   drive.files.list({
-    pageSize: 10,
     fields: 'nextPageToken, files(id, name)',
+    q: `'1p7ToKPhqgZAxeohkWKiQSz7QAuTHVP' in parents`
   }, (err, res) => {
     if (err) return console.log('The API returned an error: ' + err);
     const files = res.data.files;
     if (files.length) {
-      console.log('Files:');
-      files.map((file) => {
-        console.log(`${file.name} (${file.id})`);
-      });
+      console.log(`Succesfully listed ${files.length} file(s).`)
+      console.log(`Starting downloading them...`)
+      files.forEach((file) => {
+        const dest = fs.createWriteStream(`files/${file.name}`);
+        console.log(`\nStarting downloading "${file.name}"...`)
+        drive.files.get({
+            fileId: file.id,
+            alt: 'media'
+          }, {
+            responseType: 'stream'
+          },
+          function (err, res) {
+            res.data
+              .on('end', () => {
+                console.log('Done');
+              })
+              .on('error', err => {
+                console.log(`An error occured while downloading "${file.name}" : "${err}"`)
+              })
+              .pipe(dest);
+          }
+        );
+      })
     } else {
       console.log('No files found.');
     }
   });
+
 }
